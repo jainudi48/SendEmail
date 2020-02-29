@@ -4,21 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SendEmail
+namespace WishTheEmployee
 {
-    class EmployeeProfile
+    public class EmployeeProfile
     {
-        private string Alias;
-        private string EmpName;
-        private DateTime DateOfBirthday;
-        private DateTime DateOfJoining;
+        public string Alias { get; set; }
+        public string EmpName { get; set; }
+        public DateTime DateOfBirthday { get; set; }
+        public DateTime DateOfJoining { get; set; }
+        public bool birthdayWishSentForCurrentYear { get; set; }
+        public bool serviceAnniversaryWishSentForCurrentYear { get; set; }
+    }
 
-        public EmployeeProfile(string alias, string empName, DateTime dateOfBirthday, DateTime dateOfJoining)
-        {
-            Alias = alias;
-            EmpName = empName;
-            DateOfBirthday = dateOfBirthday;
-            DateOfJoining = dateOfJoining;
-        }
+    public class EmployeeProfiles
+    {
+        public List<EmployeeProfile> employeeProfiles { get; set; }
     }
 }
