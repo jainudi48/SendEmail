@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WishTheEmployee
+namespace SendEmail
 {
     public class EmployeeProfile
     {
@@ -18,6 +18,6 @@ namespace WishTheEmployee
 
     public class EmployeeProfiles
     {
-        public List<EmployeeProfile> employeeProfiles { get; set; }
+        public List<EmployeeProfile> listOfEmployeeProfiles { get; set; }
     }
 }
