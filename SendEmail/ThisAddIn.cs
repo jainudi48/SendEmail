@@ -15,42 +15,7 @@ namespace SendEmail
         string serializedFileName;
         private void SendWish(EmployeeProfiles shortlistedEmpProfiles)
         {
-            int yearsDiffBirthday = 0;
-            int yearsDiffJoining = 0;
-
-            foreach (var item in shortlistedEmpProfiles.listOfEmployeeProfiles)
-            {
-                yearsDiffBirthday = DateTime.Now.Year - item.DateOfBirthday.Year;
-                yearsDiffJoining = DateTime.Now.Year - item.DateOfJoining.Year;
-
-                // conditions for birthday
-                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date == DateTime.Now.Date)
-                {
-                    SendBirthDayWishForToday(item);
-                }
-                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date < DateTime.Now.Date)
-                {
-                    SendBirthdayWishBelated(item);
-                }
-                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date > DateTime.Now.Date)
-                {
-                    SendBirthdayWishInAdvance(item);
-                }
-
-                // conditions for service delivery anniversary
-                if(item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date)
-                {
-                    SendServiceAnniversaryWishForToday(item);
-                }
-                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date < DateTime.Now.Date)
-                {
-                    SendServiceAnniversaryWishBelated(item);
-                }
-                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date > DateTime.Now.Date)
-                {
-                    SendServiceAnniversaryWishInAdvance(item);
-                }
-            }
+            
         }
 
         private void SendServiceAnniversaryWishInAdvance(EmployeeProfile emp)
@@ -159,43 +124,96 @@ namespace SendEmail
             if (empProfiles.listOfEmployeeProfiles.Count == 0)
                 return;
 
-            var listOfEmpProfilesNeededToBeSentEmail = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmail(empProfiles);
-            if (listOfEmpProfilesNeededToBeSentEmail.listOfEmployeeProfiles.Count == 0)
-                return;
+            var listOfEmpProfilesNeededToBeSentEmailForBirthdays = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForBirthdays(empProfiles);
+            if (listOfEmpProfilesNeededToBeSentEmailForBirthdays.listOfEmployeeProfiles.Count != 0)
+                SendWishBirthdays(listOfEmpProfilesNeededToBeSentEmailForBirthdays);
 
-            SendWish(listOfEmpProfilesNeededToBeSentEmail);
+            var listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(empProfiles);
+            if (listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries.listOfEmployeeProfiles.Count != 0)
+                SendWishServiceDeliveries(listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries);
+
         }
 
-        private object GetEmpProfilesNeededToBeSentEmail(EmployeeProfiles empProfiles)
+        private void SendWishServiceDeliveries(EmployeeProfiles listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries)
         {
-            EmployeeProfiles shortlistedEmpProfiles = new EmployeeProfiles();
-            shortlistedEmpProfiles.listOfEmployeeProfiles = new List<EmployeeProfile>();
+            int yearsDiffJoining = 0;
+
+            foreach (var item in listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries.listOfEmployeeProfiles)
+            {
+                yearsDiffJoining = DateTime.Now.Year - item.DateOfJoining.Year;
+
+                // conditions for service delivery anniversary
+                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date)
+                {
+                    SendServiceAnniversaryWishForToday(item);
+                }
+                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date < DateTime.Now.Date)
+                {
+                    SendServiceAnniversaryWishBelated(item);
+                }
+                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date > DateTime.Now.Date)
+                {
+                    SendServiceAnniversaryWishInAdvance(item);
+                }
+            }
+        }
+
+        private void SendWishBirthdays(EmployeeProfiles listOfEmpProfilesNeededToBeSentEmailForBirthdays)
+        {
+            int yearsDiffBirthday = 0;
+
+            foreach (var item in listOfEmpProfilesNeededToBeSentEmailForBirthdays.listOfEmployeeProfiles)
+            {
+                yearsDiffBirthday = DateTime.Now.Year - item.DateOfBirthday.Year;
+
+                // conditions for birthday
+                if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date == DateTime.Now.Date)
+                {
+                    SendBirthDayWishForToday(item);
+                }
+                if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date < DateTime.Now.Date)
+                {
+                    SendBirthdayWishBelated(item);
+                }
+                if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date > DateTime.Now.Date)
+                {
+                    SendBirthdayWishInAdvance(item);
+                }
+            }
+        }
+
+        private object GetEmpProfilesNeededToBeSentEmailForBirthdays(EmployeeProfiles empProfiles)
+        {
+            EmployeeProfiles shortlistedEmpProfilesForBirthdays = new EmployeeProfiles();
+            shortlistedEmpProfilesForBirthdays.listOfEmployeeProfiles = new List<EmployeeProfile>();
+
+
             int yearDiffBirthday = 0;
-            int yearDiffJoining = 0;
+           
 
             foreach (var item in empProfiles.listOfEmployeeProfiles)
             {
                 yearDiffBirthday = DateTime.Now.Year - item.DateOfBirthday.Year;
-                yearDiffJoining = DateTime.Now.Year - item.DateOfJoining.Year;
+           
 
                 // conditions for wish to be sent on same day
                 bool c1 = item.DateOfBirthday.Date.Day == DateTime.Now.Date.Day && item.DateOfBirthday.Date.Month == DateTime.Now.Date.Month;
-                bool c2 = item.DateOfJoining.Date.Day == DateTime.Now.Date.Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.Month;
+           
 
                 // conditions for advance wish
                 bool c3 = (item.DateOfBirthday.Date.Day == DateTime.Now.Date.AddDays(1).Day && item.DateOfBirthday.Date.Month == DateTime.Now.Date.AddDays(1).Month) && (DateTime.Now.Date.AddDays(1).DayOfWeek == DayOfWeek.Saturday);
-                bool c4 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(1).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(1).Month) && (DateTime.Now.Date.AddDays(1).DayOfWeek == DayOfWeek.Saturday);
+           
                 bool c5 = (item.DateOfBirthday.Date.Day == DateTime.Now.Date.AddDays(2).Day && item.DateOfBirthday.Date.Month == DateTime.Now.Date.AddDays(2).Month) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
-                bool c6 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(2).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(2).Month) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
+           
 
                 // conditions for missed wish
                 // Added the year difference b/w actual date of occasion and current date
                 bool c7 = (item.DateOfBirthday.Date.AddYears(yearDiffBirthday) >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfBirthday.Date.AddYears(yearDiffBirthday) < DateTime.Now.Date);
-                bool c8 = (item.DateOfJoining.Date.AddYears(yearDiffJoining) >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfJoining.Date.AddYears(yearDiffJoining) < DateTime.Now.Date);
+           
 
                 // conditions to check status flag 
                 bool c9 = item.birthdayWishSentForCurrentYear == false;
-                bool c10 = item.serviceAnniversaryWishSentForCurrentYear == false;
+           
 
                 
                 /*
@@ -206,38 +224,94 @@ namespace SendEmail
                     (
                         1. dob matches current date 
                         OR
-                        2. doj matches current date
-                        OR
                         3. current day +1 is dob AND dob day is saturday 
-                        OR
-                        4. current day +1 is doj AND doj day is saturday 
                         OR
                         5. current day +2 is dob AND dob day is sunday 
                         OR
-                        6. current day +1 is doj AND doj day is sunday 
-                        OR
                         7. dob is lesser or equals to current day - 7
-                        OR 
-                        8. doj is lesser or equals to current day - 7
                     )
                     AND
                     (
                         9. status of dob is false
-                        OR
-                        10. status of doj is false
                     )
                 )*/
 
                 
 
-                if ( (c1 || c2 || c3 || c4 || c5 || c6 || c7 || c8) && (c9 || c10) )
+                if ((c1 || c3 || c5 || c7) && (c9))
                 {
-                    shortlistedEmpProfiles.listOfEmployeeProfiles.Add(item);
+                    shortlistedEmpProfilesForBirthdays.listOfEmployeeProfiles.Add(item);
                 }
             }
 
-            return shortlistedEmpProfiles;
+            return shortlistedEmpProfilesForBirthdays;
         }
+
+        private object GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(EmployeeProfiles empProfiles)
+        {
+            EmployeeProfiles shortlistedEmpProfilesForServiceDeliveries = new EmployeeProfiles();
+            shortlistedEmpProfilesForServiceDeliveries.listOfEmployeeProfiles = new List<EmployeeProfile>();
+
+
+            
+            int yearDiffJoining = 0;
+
+            foreach (var item in empProfiles.listOfEmployeeProfiles)
+            {
+            
+                yearDiffJoining = DateTime.Now.Year - item.DateOfJoining.Year;
+
+                // conditions for wish to be sent on same day
+            
+                bool c2 = item.DateOfJoining.Date.Day == DateTime.Now.Date.Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.Month;
+
+                // conditions for advance wish
+            
+                bool c4 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(1).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(1).Month) && (DateTime.Now.Date.AddDays(1).DayOfWeek == DayOfWeek.Saturday);
+            
+                bool c6 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(2).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(2).Month) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
+
+                // conditions for missed wish
+                // Added the year difference b/w actual date of occasion and current date
+            
+                bool c8 = (item.DateOfJoining.Date.AddYears(yearDiffJoining) >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfJoining.Date.AddYears(yearDiffJoining) < DateTime.Now.Date);
+
+                // conditions to check status flag 
+            
+                bool c10 = item.serviceAnniversaryWishSentForCurrentYear == false;
+
+
+                /*
+                 * Below is the pseudo code for the below condition
+                 * 
+                if
+                (
+                    (
+                        2. doj matches current date
+                        OR
+                        4. current day +1 is doj AND doj day is saturday 
+                        OR
+                        6. current day +2 is doj AND doj day is sunday 
+                        OR
+                        8. doj is lesser or equals to current day - 7
+                    )
+                    AND
+                    (
+                        10. status of doj is false
+                    )
+                )*/
+
+
+
+                if ((c2 || c4 || c6 || c8) && (c10))
+                {
+                    shortlistedEmpProfilesForServiceDeliveries.listOfEmployeeProfiles.Add(item);
+                }
+            }
+
+            return shortlistedEmpProfilesForServiceDeliveries;
+        }
+
 
         private EmployeeProfiles GetEmployeeProfiles()
         {
