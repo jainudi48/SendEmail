@@ -22,59 +22,129 @@ namespace SendEmail
                 // conditions for birthday
                 if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.Date == DateTime.Now.Date)
                 {
-                    SendBirthDayWishForToday();
+                    SendBirthDayWishForToday(item);
                 }
                 if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.Date < DateTime.Now.Date)
                 {
-                    SendBirthdayWishBelated();
+                    SendBirthdayWishBelated(item);
                 }
                 if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.Date > DateTime.Now.Date)
                 {
-                    SendBirthdayWishInAdvance();
+                    SendBirthdayWishInAdvance(item);
                 }
 
                 // conditions for service delivery anniversary
                 if(item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining == DateTime.Now.Date)
                 {
-                    SendServiceAnniversaryWishForToday();
+                    SendServiceAnniversaryWishForToday(item);
                 }
                 if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining == DateTime.Now.Date)
                 {
-                    SendServiceAnniversaryWishBelated();
+                    SendServiceAnniversaryWishBelated(item);
                 }
                 if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining == DateTime.Now.Date)
                 {
-                    SendServiceAnniversaryWishInAdvance();
+                    SendServiceAnniversaryWishInAdvance(item);
                 }
             }
         }
 
-        private void SendServiceAnniversaryWish()
+        private void SendServiceAnniversaryWishInAdvance(EmployeeProfile emp)
         {
+            string name = emp.EmpName;
+            string email = DecorateEmailFromAlias(emp.Alias);
+            string yearsWorking = (emp.DateOfJoining.Year - DateTime.Now.Year).ToString();
+
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "This is the subject";
-            mailItem.To = "jain.udit48@outlook.com";
-            mailItem.Body = "This is the message.";
+            mailItem.Subject = "Happy Service Anniversary " + name; ;
+            mailItem.To = email;
+            mailItem.Body = "Happy " + yearsWorking + " years of Service Anniversary in advance!";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
             mailItem.Display(false);
-            mailItem.Send();
-            throw new NotImplementedException();
         }
 
-        private void SendBirthDayWish()
+        private void SendServiceAnniversaryWishBelated(EmployeeProfile emp)
         {
+            string name = emp.EmpName;
+            string email = DecorateEmailFromAlias(emp.Alias);
+            string yearsWorking = (emp.DateOfJoining.Year - DateTime.Now.Year).ToString();
+
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "This is the subject";
-            mailItem.To = "jain.udit48@outlook.com";
-            mailItem.Body = "This is the message.";
+            mailItem.Subject = "Happy Service Anniversary " + name; ;
+            mailItem.To = email;
+            mailItem.Body = "Happy Belated " + yearsWorking + " years of Service Anniversary!";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
             mailItem.Display(false);
-            mailItem.Send();
-            throw new NotImplementedException();
+        }
+
+        private void SendServiceAnniversaryWishForToday(EmployeeProfile emp)
+        {
+            string name = emp.EmpName;
+            string email = DecorateEmailFromAlias(emp.Alias);
+            string yearsWorking = (emp.DateOfJoining.Year - DateTime.Now.Year).ToString();
+
+            Outlook.MailItem mailItem = (Outlook.MailItem)
+                this.Application.CreateItem(Outlook.OlItemType.olMailItem);
+
+            mailItem.Subject = "Happy Service Anniversary " + name; ;
+            mailItem.To = email;
+            mailItem.Body = "Happy " + yearsWorking + " years of Service Anniversary!";
+            mailItem.Importance = Outlook.OlImportance.olImportanceLow;
+            mailItem.Display(false);
+        }
+
+        private void SendBirthdayWishInAdvance(EmployeeProfile emp)
+        {
+            string name = emp.EmpName;
+            string email = DecorateEmailFromAlias(emp.Alias);
+
+            Outlook.MailItem mailItem = (Outlook.MailItem)
+                this.Application.CreateItem(Outlook.OlItemType.olMailItem);
+
+            mailItem.Subject = "Happy Birthday " + name; ;
+            mailItem.To = email;
+            mailItem.Body = "Happy Birthday in advance!";
+            mailItem.Importance = Outlook.OlImportance.olImportanceLow;
+            mailItem.Display(false);
+        }
+
+        private void SendBirthdayWishBelated(EmployeeProfile emp)
+        {
+            string name = emp.EmpName;
+            string email = DecorateEmailFromAlias(emp.Alias);
+
+            Outlook.MailItem mailItem = (Outlook.MailItem)
+                this.Application.CreateItem(Outlook.OlItemType.olMailItem);
+
+            mailItem.Subject = "Happy Birthday " + name; ;
+            mailItem.To = email;
+            mailItem.Body = "Happy Belated Birthday!";
+            mailItem.Importance = Outlook.OlImportance.olImportanceLow;
+            mailItem.Display(false);
+        }
+
+        private void SendBirthDayWishForToday(EmployeeProfile emp)
+        {
+            string name = emp.EmpName;
+            string email = DecorateEmailFromAlias(emp.Alias);
+
+            Outlook.MailItem mailItem = (Outlook.MailItem)
+                this.Application.CreateItem(Outlook.OlItemType.olMailItem);
+
+            mailItem.Subject = "Happy Birthday " + name; ;
+            mailItem.To = email;
+            mailItem.Body = "Happy Birthday!";
+            mailItem.Importance = Outlook.OlImportance.olImportanceLow;
+            mailItem.Display(false);
+        }
+
+        private string DecorateEmailFromAlias(string alias)
+        {
+            return alias + "@microsoft.com";
         }
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
@@ -100,16 +170,17 @@ namespace SendEmail
             foreach(var item in empProfiles.listOfEmployeeProfiles)
             {
                 // conditions for wish to be sent on same day
-                bool c1 = item.DateOfBirthday.Date == DateTime.Now.Date;
-                bool c2 = item.DateOfJoining.Date == DateTime.Now.Date;
+                bool c1 = item.DateOfBirthday.Date.Day == DateTime.Now.Date.Day && item.DateOfBirthday.Date.Month == DateTime.Now.Date.Month;
+                bool c2 = item.DateOfJoining.Date.Day == DateTime.Now.Date.Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.Month;
 
                 // conditions for advance wish
-                bool c3 = (item.DateOfBirthday.Date == DateTime.Now.Date.AddDays(1)) && (DateTime.Now.Date.AddDays(1).DayOfWeek == DayOfWeek.Saturday);
-                bool c4 = (item.DateOfJoining.Date == DateTime.Now.Date.AddDays(1)) && (DateTime.Now.Date.AddDays(1).DayOfWeek == DayOfWeek.Saturday);
-                bool c5 = (item.DateOfBirthday.Date == DateTime.Now.Date.AddDays(2)) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
-                bool c6 = (item.DateOfJoining.Date == DateTime.Now.Date.AddDays(2)) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
+                bool c3 = (item.DateOfBirthday.Date.Day == DateTime.Now.Date.AddDays(1).Day && item.DateOfBirthday.Date.Month == DateTime.Now.Date.AddDays(1).Month) && (DateTime.Now.Date.AddDays(1).DayOfWeek == DayOfWeek.Saturday);
+                bool c4 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(1).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(1).Month) && (DateTime.Now.Date.AddDays(1).DayOfWeek == DayOfWeek.Saturday);
+                bool c5 = (item.DateOfBirthday.Date.Day == DateTime.Now.Date.AddDays(2).Day && item.DateOfBirthday.Date.Month == DateTime.Now.Date.AddDays(2).Month) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
+                bool c6 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(2).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(2).Month) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
 
                 // conditions for missed wish
+                // below two conditions need to be checked
                 bool c7 = (item.DateOfBirthday.Date >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfBirthday.Date < DateTime.Now.Date);
                 bool c8 = (item.DateOfJoining.Date >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfJoining.Date < DateTime.Now.Date);
 
