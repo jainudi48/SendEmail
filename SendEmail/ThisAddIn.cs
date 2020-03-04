@@ -15,34 +15,38 @@ namespace SendEmail
         string serializedFileName;
         private void SendWish(EmployeeProfiles shortlistedEmpProfiles)
         {
-            
-            
-            foreach(var item in shortlistedEmpProfiles.listOfEmployeeProfiles)
+            int yearsDiffBirthday = 0;
+            int yearsDiffJoining = 0;
+
+            foreach (var item in shortlistedEmpProfiles.listOfEmployeeProfiles)
             {
+                yearsDiffBirthday = DateTime.Now.Year - item.DateOfBirthday.Year;
+                yearsDiffJoining = DateTime.Now.Year - item.DateOfJoining.Year;
+
                 // conditions for birthday
-                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.Date == DateTime.Now.Date)
+                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date == DateTime.Now.Date)
                 {
                     SendBirthDayWishForToday(item);
                 }
-                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.Date < DateTime.Now.Date)
+                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date < DateTime.Now.Date)
                 {
                     SendBirthdayWishBelated(item);
                 }
-                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.Date > DateTime.Now.Date)
+                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date > DateTime.Now.Date)
                 {
                     SendBirthdayWishInAdvance(item);
                 }
 
                 // conditions for service delivery anniversary
-                if(item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining == DateTime.Now.Date)
+                if(item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date)
                 {
                     SendServiceAnniversaryWishForToday(item);
                 }
-                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining == DateTime.Now.Date)
+                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date < DateTime.Now.Date)
                 {
                     SendServiceAnniversaryWishBelated(item);
                 }
-                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining == DateTime.Now.Date)
+                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date > DateTime.Now.Date)
                 {
                     SendServiceAnniversaryWishInAdvance(item);
                 }
@@ -53,7 +57,7 @@ namespace SendEmail
         {
             string name = emp.EmpName;
             string email = DecorateEmailFromAlias(emp.Alias);
-            string yearsWorking = (emp.DateOfJoining.Year - DateTime.Now.Year).ToString();
+            string yearsWorking = (DateTime.Now.Year - emp.DateOfJoining.Year).ToString();
 
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
@@ -69,7 +73,7 @@ namespace SendEmail
         {
             string name = emp.EmpName;
             string email = DecorateEmailFromAlias(emp.Alias);
-            string yearsWorking = (emp.DateOfJoining.Year - DateTime.Now.Year).ToString();
+            string yearsWorking = (DateTime.Now.Year - emp.DateOfJoining.Year).ToString();
 
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
@@ -85,7 +89,7 @@ namespace SendEmail
         {
             string name = emp.EmpName;
             string email = DecorateEmailFromAlias(emp.Alias);
-            string yearsWorking = (emp.DateOfJoining.Year - DateTime.Now.Year).ToString();
+            string yearsWorking = (DateTime.Now.Year - emp.DateOfJoining.Year).ToString();
 
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
@@ -166,9 +170,14 @@ namespace SendEmail
         {
             EmployeeProfiles shortlistedEmpProfiles = new EmployeeProfiles();
             shortlistedEmpProfiles.listOfEmployeeProfiles = new List<EmployeeProfile>();
+            int yearDiffBirthday = 0;
+            int yearDiffJoining = 0;
 
-            foreach(var item in empProfiles.listOfEmployeeProfiles)
+            foreach (var item in empProfiles.listOfEmployeeProfiles)
             {
+                yearDiffBirthday = DateTime.Now.Year - item.DateOfBirthday.Year;
+                yearDiffJoining = DateTime.Now.Year - item.DateOfJoining.Year;
+
                 // conditions for wish to be sent on same day
                 bool c1 = item.DateOfBirthday.Date.Day == DateTime.Now.Date.Day && item.DateOfBirthday.Date.Month == DateTime.Now.Date.Month;
                 bool c2 = item.DateOfJoining.Date.Day == DateTime.Now.Date.Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.Month;
@@ -180,9 +189,9 @@ namespace SendEmail
                 bool c6 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(2).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(2).Month) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
 
                 // conditions for missed wish
-                // below two conditions need to be checked
-                bool c7 = (item.DateOfBirthday.Date >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfBirthday.Date < DateTime.Now.Date);
-                bool c8 = (item.DateOfJoining.Date >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfJoining.Date < DateTime.Now.Date);
+                // Added the year difference b/w actual date of occasion and current date
+                bool c7 = (item.DateOfBirthday.Date.AddYears(yearDiffBirthday) >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfBirthday.Date.AddYears(yearDiffBirthday) < DateTime.Now.Date);
+                bool c8 = (item.DateOfJoining.Date.AddYears(yearDiffJoining) >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfJoining.Date.AddYears(yearDiffJoining) < DateTime.Now.Date);
 
                 // conditions to check status flag 
                 bool c9 = item.birthdayWishSentForCurrentYear == false;
