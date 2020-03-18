@@ -13,10 +13,10 @@ namespace SendEmail
     public partial class ThisAddIn
     {
         string serializedFileName;
-        private void SendWish(EmployeeProfiles shortlistedEmpProfiles)
-        {
-            
-        }
+        string CUR_USER_NAME;
+        const string LOCAL_USER = @"C:\Users\";
+        const string MICROSOFT_OUTLOOK = @"\AppData\Local\Microsoft\Outlook\";
+        
 
         private void SendServiceAnniversaryWishInAdvance(EmployeeProfile emp)
         {
@@ -118,7 +118,8 @@ namespace SendEmail
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            serializedFileName = @"C:\Repos\WishTheEmployee\WishTheEmployee\bin\Debug\EmployeeProfilesDatabase.txt";
+            CUR_USER_NAME = Environment.UserName;
+            serializedFileName = LOCAL_USER + CUR_USER_NAME + MICROSOFT_OUTLOOK + @"EmployeeProfilesDatabase.txt";
 
             var empProfiles = GetEmployeeProfiles();
             if (empProfiles.listOfEmployeeProfiles.Count == 0)
