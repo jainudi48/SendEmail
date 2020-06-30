@@ -125,15 +125,88 @@ namespace SendEmail
             if (empProfiles.listOfEmployeeProfiles.Count == 0)
                 return;
 
-            var listOfEmpProfilesNeededToBeSentEmailForBirthdays = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForBirthdays(empProfiles);
+            var listOfEmpProfilesNeededToBeSentEmailForBirthdays = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForBirthdays(empProfiles, out EmployeeProfiles shortlistedEmpsHavingBdaysThisMonth);
             if (listOfEmpProfilesNeededToBeSentEmailForBirthdays.listOfEmployeeProfiles.Count != 0)
+            {
                 SendWishBirthdays(listOfEmpProfilesNeededToBeSentEmailForBirthdays);
-
-            var listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(empProfiles);
+            }
+            if(shortlistedEmpsHavingBdaysThisMonth.listOfEmployeeProfiles.Count != 0)
+            {
+                SendMonthlyReminderForBdays(shortlistedEmpsHavingBdaysThisMonth);
+            }
+                
+            var listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(empProfiles, out EmployeeProfiles shortlistedEmpsHavingServiceDeliveriesThisMonth);
             if (listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries.listOfEmployeeProfiles.Count != 0)
+            {
                 SendWishServiceDeliveries(listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries);
+            }
+            if (shortlistedEmpsHavingServiceDeliveriesThisMonth.listOfEmployeeProfiles.Count != 0)
+            {
+                SendMonthlyReminderForServiceDeliveries(shortlistedEmpsHavingServiceDeliveriesThisMonth);
+            }
 
         }
+
+        private void SendMonthlyReminderForBdays(EmployeeProfiles shortlistedEmpsHavingBdaysThisMonth)
+        {
+            string str = string.Empty;
+            str = "<HTML><head><style>table, th, td {border: 1px solid black;}</style></head>";
+            str += "<table><tr><th>ALIAS</th><th>NAME</th><th>BIRTHDAY</th></tr>";
+            foreach(var item in shortlistedEmpsHavingBdaysThisMonth.listOfEmployeeProfiles)
+            {
+                str += "<tr><td>" +
+                    item.Alias +
+                    "</td><td>" +
+                    item.EmpName +
+                    "</td><td>" +
+                    item.DateOfBirthday +
+                    "</td></tr>";
+            }
+
+            str += "</body></html>";
+
+            Outlook.MailItem mailItem = (Outlook.MailItem)
+                this.Application.CreateItem(Outlook.OlItemType.olMailItem);
+
+            mailItem.Subject = "MONTHLY BIRTHDAY REMINDER!!";
+            mailItem.To = Application.Session.CurrentUser.
+            AddressEntry.GetExchangeUser().PrimarySmtpAddress;
+            mailItem.HTMLBody = str;
+
+            mailItem.Importance = Outlook.OlImportance.olImportanceHigh;
+            mailItem.Send();
+        }
+
+        private void SendMonthlyReminderForServiceDeliveries(EmployeeProfiles shortlistedEmpsHavingServiceDeliveriesThisMonth)
+        {
+            string str = string.Empty;
+            str = "<HTML><head><style>table, th, td {border: 1px solid black;}</style></head>";
+            str += "<table><tr><th>ALIAS</th><th>NAME</th><th>SERVICE ANNIVERSARY</th></tr>";
+            foreach (var item in shortlistedEmpsHavingServiceDeliveriesThisMonth.listOfEmployeeProfiles)
+            {
+                str += "<tr><td>" +
+                    item.Alias +
+                    "</td><td>" +
+                    item.EmpName +
+                    "</td><td>" +
+                    item.DateOfJoining +
+                    "</td></tr>";
+            }
+
+            str += "</body></html>";
+
+            Outlook.MailItem mailItem = (Outlook.MailItem)
+                this.Application.CreateItem(Outlook.OlItemType.olMailItem);
+
+            mailItem.Subject = "MONTHLY SERVICE DELIVERY REMINDER!!";
+            mailItem.To = Application.Session.CurrentUser.
+            AddressEntry.GetExchangeUser().PrimarySmtpAddress;
+            mailItem.HTMLBody = str;
+
+            mailItem.Importance = Outlook.OlImportance.olImportanceHigh;
+            mailItem.Send();
+        }
+
 
         private void SendWishServiceDeliveries(EmployeeProfiles listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries)
         {
@@ -152,11 +225,40 @@ namespace SendEmail
                 {
                     SendServiceAnniversaryWishBelated(item);
                 }
-                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date > DateTime.Now.Date)
+                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date > DateTime.Now.Date && (item.DateOfJoining.AddYears(yearsDiffJoining).DayOfWeek == DayOfWeek.Saturday || item.DateOfJoining.AddYears(yearsDiffJoining).DayOfWeek == DayOfWeek.Sunday))
                 {
                     SendServiceAnniversaryWishInAdvance(item);
                 }
+                if(item.birthdayWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date.AddDays(1).Date)
+                {
+                    SendTomorrowServiceDeliveryReminderToManager(item);
+                }
+
             }
+        }
+
+        private void SendTomorrowServiceDeliveryReminderToManager(EmployeeProfile emp)
+        {
+            Outlook.MailItem mailItem = (Outlook.MailItem)
+                this.Application.CreateItem(Outlook.OlItemType.olMailItem);
+
+            mailItem.Subject = "REMINDER!! Service Delivery -> " + emp.EmpName;
+            mailItem.To = Application.Session.CurrentUser.
+            AddressEntry.GetExchangeUser().PrimarySmtpAddress;
+            mailItem.HTMLBody = "<HTML>Hey " +
+                "<br><br><h2>" +
+                emp.EmpName +
+                "'s SERVICE ANNIVERSARY!</h2><br><br>" + "<h4>Name: " +
+                emp.EmpName +
+                "<br>Joining Date: " +
+                emp.DateOfJoining +
+                "</h4><br><br>" + "It's been " +
+                (DateTime.Now.Year - emp.DateOfJoining.Year).ToString() +
+                " successful years!";
+
+            mailItem.Importance = Outlook.OlImportance.olImportanceHigh;
+            //mailItem.Display(false);
+            mailItem.Send();
         }
 
         private void SendWishBirthdays(EmployeeProfiles listOfEmpProfilesNeededToBeSentEmailForBirthdays)
@@ -176,18 +278,50 @@ namespace SendEmail
                 {
                     SendBirthdayWishBelated(item);
                 }
-                if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date > DateTime.Now.Date)
+                if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date > DateTime.Now.Date && (item.DateOfBirthday.AddYears(yearsDiffBirthday).DayOfWeek == DayOfWeek.Saturday || item.DateOfBirthday.AddYears(yearsDiffBirthday).DayOfWeek == DayOfWeek.Sunday))
                 {
                     SendBirthdayWishInAdvance(item);
+                }
+                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date == DateTime.Now.Date.AddDays(1).Date)
+                {
+                    SendTomorrowBirthdaysReminderToManager(item);
                 }
             }
         }
 
-        private object GetEmpProfilesNeededToBeSentEmailForBirthdays(EmployeeProfiles empProfiles)
+        private void SendTomorrowBirthdaysReminderToManager(EmployeeProfile emp)
+        {
+            Outlook.MailItem mailItem = (Outlook.MailItem)
+                this.Application.CreateItem(Outlook.OlItemType.olMailItem);
+
+            mailItem.Subject = "REMINDER!! Birthday -> " + emp.EmpName;
+            mailItem.To = Application.Session.CurrentUser.
+            AddressEntry.GetExchangeUser().PrimarySmtpAddress;
+            mailItem.HTMLBody = "<HTML><h4>Hey</h4> " +
+                "<br><br><h2>" +
+                emp.EmpName +
+                "'s BIRTHDAY!</h2><br><br>" + "<h4>Name: " +
+                emp.EmpName +
+                "<br>Birth Date: " +
+                emp.DateOfBirthday +
+                "</h4><br><br>" +
+                emp.EmpName +
+                " has become " + 
+                (DateTime.Now.Year - emp.DateOfBirthday.Year).ToString() +
+                " years old!";
+
+            mailItem.Importance = Outlook.OlImportance.olImportanceHigh;
+            //mailItem.Display(false);
+            mailItem.Send();
+        }
+
+        private object GetEmpProfilesNeededToBeSentEmailForBirthdays(EmployeeProfiles empProfiles, out EmployeeProfiles shortlistedEmpsHavingBdaysThisMonth)
         {
             EmployeeProfiles shortlistedEmpProfilesForBirthdays = new EmployeeProfiles();
             shortlistedEmpProfilesForBirthdays.listOfEmployeeProfiles = new List<EmployeeProfile>();
 
+            shortlistedEmpsHavingBdaysThisMonth = new EmployeeProfiles();
+            shortlistedEmpsHavingBdaysThisMonth.listOfEmployeeProfiles = new List<EmployeeProfile>();
 
             int yearDiffBirthday = 0;
            
@@ -214,9 +348,11 @@ namespace SendEmail
 
                 // conditions to check status flag 
                 bool c9 = item.birthdayWishSentForCurrentYear == false;
-           
 
-                
+
+                // conditions for birthdays tomorrow
+                bool c11 = (item.DateOfBirthday.Date.Day == DateTime.Now.Date.AddDays(1).Day && item.DateOfBirthday.Date.Month == DateTime.Now.Date.AddDays(1).Month);
+
                 /*
                  * Below is the pseudo code for the below condition
                  * 
@@ -230,6 +366,8 @@ namespace SendEmail
                         5. current day +2 is dob AND dob day is sunday 
                         OR
                         7. dob is lesser or equals to current day - 7
+                        OR
+                        11. curent day +1 is dob 
                     )
                     AND
                     (
@@ -239,22 +377,28 @@ namespace SendEmail
 
                 
 
-                if ((c1 || c3 || c5 || c7) && (c9))
+                if ((c1 || c3 || c5 || c7 || c11) && (c9))
                 {
                     shortlistedEmpProfilesForBirthdays.listOfEmployeeProfiles.Add(item);
+                }
+
+                if(DateTime.Now.Day == 1 && item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.Month == DateTime.Now.Month)
+                {
+                    shortlistedEmpsHavingBdaysThisMonth.listOfEmployeeProfiles.Add(item);
                 }
             }
 
             return shortlistedEmpProfilesForBirthdays;
         }
 
-        private object GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(EmployeeProfiles empProfiles)
+        private object GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(EmployeeProfiles empProfiles, out EmployeeProfiles shortlistedEmpsHavingServiceDeliveriesThisMonth)
         {
             EmployeeProfiles shortlistedEmpProfilesForServiceDeliveries = new EmployeeProfiles();
             shortlistedEmpProfilesForServiceDeliveries.listOfEmployeeProfiles = new List<EmployeeProfile>();
 
+            shortlistedEmpsHavingServiceDeliveriesThisMonth = new EmployeeProfiles();
+            shortlistedEmpsHavingServiceDeliveriesThisMonth.listOfEmployeeProfiles = new List<EmployeeProfile>();
 
-            
             int yearDiffJoining = 0;
 
             foreach (var item in empProfiles.listOfEmployeeProfiles)
@@ -262,25 +406,29 @@ namespace SendEmail
             
                 yearDiffJoining = DateTime.Now.Year - item.DateOfJoining.Year;
 
+                
                 // conditions for wish to be sent on same day
-            
                 bool c2 = item.DateOfJoining.Date.Day == DateTime.Now.Date.Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.Month;
 
+                
                 // conditions for advance wish
-            
                 bool c4 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(1).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(1).Month) && (DateTime.Now.Date.AddDays(1).DayOfWeek == DayOfWeek.Saturday);
             
                 bool c6 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(2).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(2).Month) && (DateTime.Now.Date.AddDays(2).DayOfWeek == DayOfWeek.Sunday);
+
 
                 // conditions for missed wish
                 // Added the year difference b/w actual date of occasion and current date
             
                 bool c8 = (item.DateOfJoining.Date.AddYears(yearDiffJoining) >= DateTime.Now.Date.AddDays(-7)) && (item.DateOfJoining.Date.AddYears(yearDiffJoining) < DateTime.Now.Date);
 
+                
                 // conditions to check status flag 
-            
                 bool c10 = item.serviceAnniversaryWishSentForCurrentYear == false;
 
+                
+                // conditions for service deliveries tomorrow
+                bool c12 = (item.DateOfJoining.Date.Day == DateTime.Now.Date.AddDays(1).Day && item.DateOfJoining.Date.Month == DateTime.Now.Date.AddDays(1).Month);
 
                 /*
                  * Below is the pseudo code for the below condition
@@ -295,6 +443,8 @@ namespace SendEmail
                         6. current day +2 is doj AND doj day is sunday 
                         OR
                         8. doj is lesser or equals to current day - 7
+                        OR
+                        12. current day +1 is doj
                     )
                     AND
                     (
@@ -304,9 +454,14 @@ namespace SendEmail
 
 
 
-                if ((c2 || c4 || c6 || c8) && (c10))
+                if ((c2 || c4 || c6 || c8 || c12) && (c10))
                 {
                     shortlistedEmpProfilesForServiceDeliveries.listOfEmployeeProfiles.Add(item);
+                }
+
+                if (DateTime.Now.Day == 1 && item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.Month == DateTime.Now.Month)
+                {
+                    shortlistedEmpsHavingServiceDeliveriesThisMonth.listOfEmployeeProfiles.Add(item);
                 }
             }
 
