@@ -16,7 +16,9 @@ namespace SendEmail
         string CUR_USER_NAME;
         const string LOCAL_USER = @"C:\Users\";
         const string MICROSOFT_OUTLOOK = @"\AppData\Local\Microsoft\Outlook\";
-        
+        EmployeeProfiles empProfiles;
+
+
 
         private void SendServiceAnniversaryWishInAdvance(EmployeeProfile emp)
         {
@@ -121,7 +123,7 @@ namespace SendEmail
             CUR_USER_NAME = Environment.UserName;
             serializedFileName = LOCAL_USER + CUR_USER_NAME + MICROSOFT_OUTLOOK + @"EmployeeProfilesDatabase.txt";
 
-            var empProfiles = GetEmployeeProfiles();
+            empProfiles = GetEmployeeProfiles();
             if (empProfiles.listOfEmployeeProfiles.Count == 0)
                 return;
 
@@ -217,24 +219,30 @@ namespace SendEmail
                 yearsDiffJoining = DateTime.Now.Year - item.DateOfJoining.Year;
 
                 // conditions for service delivery anniversary
+
+                if (item.birthdayWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date.AddDays(1).Date)
+                {
+                    SendTomorrowServiceDeliveryReminderToManager(item);
+                }
                 if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date)
                 {
                     SendServiceAnniversaryWishForToday(item);
+                    item.serviceAnniversaryWishSentForCurrentYear = true;
                 }
                 if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date < DateTime.Now.Date)
                 {
                     SendServiceAnniversaryWishBelated(item);
+                    item.serviceAnniversaryWishSentForCurrentYear = true;
                 }
                 if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date > DateTime.Now.Date && (item.DateOfJoining.AddYears(yearsDiffJoining).DayOfWeek == DayOfWeek.Saturday || item.DateOfJoining.AddYears(yearsDiffJoining).DayOfWeek == DayOfWeek.Sunday))
                 {
                     SendServiceAnniversaryWishInAdvance(item);
-                }
-                if(item.birthdayWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date.AddDays(1).Date)
-                {
-                    SendTomorrowServiceDeliveryReminderToManager(item);
+                    item.serviceAnniversaryWishSentForCurrentYear = true;
                 }
 
             }
+
+            UpdateDbAfterWishSent(listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries);
         }
 
         private void SendTomorrowServiceDeliveryReminderToManager(EmployeeProfile emp)
@@ -270,22 +278,48 @@ namespace SendEmail
                 yearsDiffBirthday = DateTime.Now.Year - item.DateOfBirthday.Year;
 
                 // conditions for birthday
+                if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date == DateTime.Now.Date.AddDays(1).Date)
+                {
+                    SendTomorrowBirthdaysReminderToManager(item);
+                }
                 if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date == DateTime.Now.Date)
                 {
                     SendBirthDayWishForToday(item);
+                    item.birthdayWishSentForCurrentYear = true;
                 }
                 if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date < DateTime.Now.Date)
                 {
                     SendBirthdayWishBelated(item);
+                    item.birthdayWishSentForCurrentYear = true;
                 }
                 if (item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date > DateTime.Now.Date && (item.DateOfBirthday.AddYears(yearsDiffBirthday).DayOfWeek == DayOfWeek.Saturday || item.DateOfBirthday.AddYears(yearsDiffBirthday).DayOfWeek == DayOfWeek.Sunday))
                 {
                     SendBirthdayWishInAdvance(item);
+                    item.birthdayWishSentForCurrentYear = true;
                 }
-                if(item.birthdayWishSentForCurrentYear == false && item.DateOfBirthday.AddYears(yearsDiffBirthday).Date == DateTime.Now.Date.AddDays(1).Date)
+                
+            }
+
+            UpdateDbAfterWishSent(listOfEmpProfilesNeededToBeSentEmailForBirthdays);
+        }
+
+        private void UpdateDbAfterWishSent(EmployeeProfiles empPros)
+        {
+            int index = -1;
+            foreach(var item in empPros.listOfEmployeeProfiles)
+            {
+                index = empProfiles.listOfEmployeeProfiles.FindIndex(m => m.Alias == item.Alias);
+                if(index>=0 && index<empProfiles.listOfEmployeeProfiles.Count)
                 {
-                    SendTomorrowBirthdaysReminderToManager(item);
+                    empProfiles.listOfEmployeeProfiles[index].birthdayWishSentForCurrentYear = item.birthdayWishSentForCurrentYear;
+                    empProfiles.listOfEmployeeProfiles[index].serviceAnniversaryWishSentForCurrentYear = item.serviceAnniversaryWishSentForCurrentYear;
                 }
+            }
+            
+            if(File.Exists(serializedFileName))
+            {
+                string jsonString = JsonConvert.SerializeObject(empProfiles, Formatting.Indented);
+                File.WriteAllText(serializedFileName, jsonString);
             }
         }
 
