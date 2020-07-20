@@ -243,6 +243,7 @@
     <None Include="SendEmail_1_TemporaryKey.pfx" />
     <None Include="SendEmail_key.snk" />
     <None Include="SendEmail_TemporaryKey.pfx" />
+    <None Include="SendWishesKey.snk" />
     <None Include="ThisAddIn.Designer.xml">
       <DependentUpon>ThisAddIn.cs</DependentUpon>
     </None>
@@ -268,7 +269,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>SendEmailTempKey.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>SendWishesKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
