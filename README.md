@@ -7,9 +7,12 @@ Outlook AddIn for celebrating birthdays and joinings
 3. 1st of every month, one should receive email with a list of all the birthdays and service deliveries in this month.
 4. send reminder 1 day ago for birthdays and service deliveries.
 
+# Future Changes
+1. Remove birth year from all the emails 
+2. In drafted email, add the date of joining/birth so manager has more visibility around the dates (without year for birthdays)
+
 # Bug
 1. Flags are not resetting to false at the year end. 
 Logic:
   a. Reset flags for service delivery and birthday at year end.
   b. If anyone's wishing date lies in 1st week of the year then advance wishing logic should be rechecked.
-  
