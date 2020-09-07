@@ -1,12 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Linq;
-using Outlook = Microsoft.Office.Interop.Outlook;
-using Office = Microsoft.Office.Core;
 using System.IO;
-using Newtonsoft.Json;
+using Outlook = Microsoft.Office.Interop.Outlook;
+using System.Timers;
 
 namespace SendEmail
 {
@@ -17,7 +14,7 @@ namespace SendEmail
         const string LOCAL_USER = @"C:\Users\";
         const string MICROSOFT_OUTLOOK = @"\AppData\Local\Microsoft\Outlook\";
         EmployeeProfiles empProfiles;
-
+        private static System.Timers.Timer aTimer;
 
 
         private void SendServiceAnniversaryWishInAdvance(EmployeeProfile emp)
@@ -118,11 +115,18 @@ namespace SendEmail
             return alias + "@microsoft.com";
         }
 
-        private void ThisAddIn_Startup(object sender, System.EventArgs e)
+        private void SetTimer()
         {
-            CUR_USER_NAME = Environment.UserName;
-            serializedFileName = LOCAL_USER + CUR_USER_NAME + MICROSOFT_OUTLOOK + @"EmployeeProfilesDatabase.txt";
+            // Create a timer with a two second interval.
+            aTimer = new Timer(60000);
+            // Hook up the Elapsed event for the timer. 
+            aTimer.Elapsed += OnTimedEvent;
+            aTimer.AutoReset = true;
+            aTimer.Enabled = true;
+        }
 
+        private void OnTimedEvent(object sender, ElapsedEventArgs e)
+        {
             empProfiles = GetEmployeeProfiles();
             if (empProfiles.listOfEmployeeProfiles.Count == 0)
                 return;
@@ -132,11 +136,11 @@ namespace SendEmail
             {
                 SendWishBirthdays(listOfEmpProfilesNeededToBeSentEmailForBirthdays);
             }
-            if(shortlistedEmpsHavingBdaysThisMonth.listOfEmployeeProfiles.Count != 0)
+            if (shortlistedEmpsHavingBdaysThisMonth.listOfEmployeeProfiles.Count != 0)
             {
                 SendMonthlyReminderForBdays(shortlistedEmpsHavingBdaysThisMonth);
             }
-                
+
             var listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(empProfiles, out EmployeeProfiles shortlistedEmpsHavingServiceDeliveriesThisMonth);
             if (listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries.listOfEmployeeProfiles.Count != 0)
             {
@@ -146,7 +150,37 @@ namespace SendEmail
             {
                 SendMonthlyReminderForServiceDeliveries(shortlistedEmpsHavingServiceDeliveriesThisMonth);
             }
+        }
 
+        private void ThisAddIn_Startup(object sender, System.EventArgs e)
+        {
+            CUR_USER_NAME = Environment.UserName;
+            serializedFileName = LOCAL_USER + CUR_USER_NAME + MICROSOFT_OUTLOOK + @"EmployeeProfilesDatabase.txt";
+
+            //empProfiles = GetEmployeeProfiles();
+            //if (empProfiles.listOfEmployeeProfiles.Count == 0)
+            //    return;
+
+            //var listOfEmpProfilesNeededToBeSentEmailForBirthdays = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForBirthdays(empProfiles, out EmployeeProfiles shortlistedEmpsHavingBdaysThisMonth);
+            //if (listOfEmpProfilesNeededToBeSentEmailForBirthdays.listOfEmployeeProfiles.Count != 0)
+            //{
+            //    SendWishBirthdays(listOfEmpProfilesNeededToBeSentEmailForBirthdays);
+            //}
+            //if(shortlistedEmpsHavingBdaysThisMonth.listOfEmployeeProfiles.Count != 0)
+            //{
+            //    SendMonthlyReminderForBdays(shortlistedEmpsHavingBdaysThisMonth);
+            //}
+                
+            //var listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(empProfiles, out EmployeeProfiles shortlistedEmpsHavingServiceDeliveriesThisMonth);
+            //if (listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries.listOfEmployeeProfiles.Count != 0)
+            //{
+            //    SendWishServiceDeliveries(listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries);
+            //}
+            //if (shortlistedEmpsHavingServiceDeliveriesThisMonth.listOfEmployeeProfiles.Count != 0)
+            //{
+            //    SendMonthlyReminderForServiceDeliveries(shortlistedEmpsHavingServiceDeliveriesThisMonth);
+            //}
+            SetTimer();
         }
 
         private void SendMonthlyReminderForBdays(EmployeeProfiles shortlistedEmpsHavingBdaysThisMonth)
@@ -323,7 +357,7 @@ namespace SendEmail
             }
         }
 
-        private void SendTomorrowBirthdaysReminderToManager(EmployeeProfile emp)
+        private void SendTomorrowBirthdaysReminderToManager(EmployeeProfile emp )
         {
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
