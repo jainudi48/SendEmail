@@ -14,7 +14,8 @@ namespace SendEmail
         const string LOCAL_USER = @"C:\Users\";
         const string MICROSOFT_OUTLOOK = @"\AppData\Local\Microsoft\Outlook\";
         EmployeeProfiles empProfiles;
-        private static System.Timers.Timer aTimer;
+        private System.Timers.Timer aTimer;
+        DateTime? lastDataTraversalDate = null;
 
 
         private void SendServiceAnniversaryWishInAdvance(EmployeeProfile emp)
@@ -73,7 +74,7 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "Happy Birthday " + name; ;
+            mailItem.Subject = "Happy Birthday " + name; 
             mailItem.To = email;
             mailItem.Body = "Happy Birthday in advance!";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
@@ -103,9 +104,16 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "Happy Birthday " + name; ;
+            mailItem.Subject = "WISH " + name + " HAPPY BIRTHDAY TODAY!!!";
             mailItem.To = email;
-            mailItem.Body = "Happy Birthday!";
+            mailItem.HTMLBody = "<HTML>Hey " +
+                "<br><br><h2>" +
+                emp.EmpName +
+                "'s BIRTHDAY!</h2><br><br>" + "<h4>Name: " +
+                emp.EmpName +
+                "<br>Birthday: " +
+                emp.DateOfBirthday.ToString("dd-MMMM") +
+                "</h4><br><br>";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
             mailItem.Display(false);
         }
@@ -118,7 +126,7 @@ namespace SendEmail
         private void SetTimer()
         {
             // Create a timer with a two second interval.
-            aTimer = new Timer(60000);
+            aTimer = new Timer(30000);
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
@@ -127,6 +135,14 @@ namespace SendEmail
 
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
+            TraverseToProcess();
+        }
+
+        private void TraverseToProcess()
+        {
+            if (lastDataTraversalDate != null && lastDataTraversalDate.Equals(DateTime.Now.Date))
+                return;
+
             empProfiles = GetEmployeeProfiles();
             if (empProfiles.listOfEmployeeProfiles.Count == 0)
                 return;
@@ -150,6 +166,8 @@ namespace SendEmail
             {
                 SendMonthlyReminderForServiceDeliveries(shortlistedEmpsHavingServiceDeliveriesThisMonth);
             }
+
+            lastDataTraversalDate = DateTime.Now.Date;
         }
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
@@ -157,29 +175,7 @@ namespace SendEmail
             CUR_USER_NAME = Environment.UserName;
             serializedFileName = LOCAL_USER + CUR_USER_NAME + MICROSOFT_OUTLOOK + @"EmployeeProfilesDatabase.txt";
 
-            //empProfiles = GetEmployeeProfiles();
-            //if (empProfiles.listOfEmployeeProfiles.Count == 0)
-            //    return;
-
-            //var listOfEmpProfilesNeededToBeSentEmailForBirthdays = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForBirthdays(empProfiles, out EmployeeProfiles shortlistedEmpsHavingBdaysThisMonth);
-            //if (listOfEmpProfilesNeededToBeSentEmailForBirthdays.listOfEmployeeProfiles.Count != 0)
-            //{
-            //    SendWishBirthdays(listOfEmpProfilesNeededToBeSentEmailForBirthdays);
-            //}
-            //if(shortlistedEmpsHavingBdaysThisMonth.listOfEmployeeProfiles.Count != 0)
-            //{
-            //    SendMonthlyReminderForBdays(shortlistedEmpsHavingBdaysThisMonth);
-            //}
-                
-            //var listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries = (EmployeeProfiles)GetEmpProfilesNeededToBeSentEmailForServiceDeliveries(empProfiles, out EmployeeProfiles shortlistedEmpsHavingServiceDeliveriesThisMonth);
-            //if (listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries.listOfEmployeeProfiles.Count != 0)
-            //{
-            //    SendWishServiceDeliveries(listOfEmpProfilesNeededToBeSentEmailForServiceDeliveries);
-            //}
-            //if (shortlistedEmpsHavingServiceDeliveriesThisMonth.listOfEmployeeProfiles.Count != 0)
-            //{
-            //    SendMonthlyReminderForServiceDeliveries(shortlistedEmpsHavingServiceDeliveriesThisMonth);
-            //}
+            //TraverseToProcess();
             SetTimer();
         }
 
@@ -254,7 +250,7 @@ namespace SendEmail
 
                 // conditions for service delivery anniversary
 
-                if (item.birthdayWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date.AddDays(1).Date)
+                if (item.serviceAnniversaryWishSentForCurrentYear == false && item.DateOfJoining.AddYears(yearsDiffJoining).Date == DateTime.Now.Date.AddDays(1).Date)
                 {
                     SendTomorrowServiceDeliveryReminderToManager(item);
                 }
@@ -293,7 +289,7 @@ namespace SendEmail
                 "'s SERVICE ANNIVERSARY!</h2><br><br>" + "<h4>Name: " +
                 emp.EmpName +
                 "<br>Joining Date: " +
-                emp.DateOfJoining +
+                emp.DateOfJoining.Date +
                 "</h4><br><br>" + "It's been " +
                 (DateTime.Now.Year - emp.DateOfJoining.Year).ToString() +
                 " successful years!";
