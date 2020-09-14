@@ -27,9 +27,19 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "Happy Service Anniversary " + name; ;
+            mailItem.Subject = "WISH " + name + " SERVICE ANNIVERSARY IN ADVANCE!!!";
             mailItem.To = email;
-            mailItem.Body = "Happy " + yearsWorking + " years of Service Anniversary in advance!";
+            mailItem.HTMLBody = "<HTML>Hey " +
+                "<br><h2>Do you want to wish " + name + " in advance as you may not wish on weekend???</h2>" +
+                "<br><br><h2>" +
+                emp.EmpName +
+                "'s SERVICE ANNIVERSARY!</h2><br><br>" + "<h4>Name: " +
+                emp.EmpName +
+                "<br>Joining Date: " +
+                emp.DateOfJoining.ToString("dd-MMMM-yyyy") +
+                "<br><br>" +
+                name + " has completed " + yearsWorking + " years working with us!" +
+                "</h4><br><br>";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
             mailItem.Display(false);
         }
@@ -43,9 +53,18 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "Happy Service Anniversary " + name; ;
+            mailItem.Subject = "WISH " + name + " BELATED HAPPY SERVICE ANNIVERSARY!!!";
             mailItem.To = email;
-            mailItem.Body = "Happy Belated " + yearsWorking + " years of Service Anniversary!";
+            mailItem.HTMLBody = "<HTML>Hey " +
+                "<br><br><h2>" +
+                emp.EmpName +
+                "'s BELATED HAPPY SERVICE ANNIVERSARY!</h2><br><br>" + "<h4>Name: " +
+                emp.EmpName +
+                "<br>Joining Date: " +
+                emp.DateOfJoining.ToString("dd-MMMM-yyyy") +
+                "<br><br>" +
+                name + " has completed " + yearsWorking + " years working with us!" +
+                "</h4><br><br>";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
             mailItem.Display(false);
         }
@@ -59,9 +78,18 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "Happy Service Anniversary " + name; ;
+            mailItem.Subject = "WISH " + name + " HAPPY SERVICE ANNIVERSARY!!!"; 
             mailItem.To = email;
-            mailItem.Body = "Happy " + yearsWorking + " years of Service Anniversary!";
+            mailItem.HTMLBody = "<HTML>Hey " +
+                "<br><br><h2>" +
+                emp.EmpName +
+                "'s SERVICE ANNIVERSARY!</h2><br><br>" + "<h4>Name: " +
+                emp.EmpName +
+                "<br>Joining Date: " +
+                emp.DateOfJoining.ToString("dd-MMMM-yyyy") +
+                "<br><br>" +
+                name + " has completed " + yearsWorking + " years working with us!" +
+                "</h4><br><br>";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
             mailItem.Display(false);
         }
@@ -74,9 +102,17 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "Happy Birthday " + name; 
+            mailItem.Subject = "WISH " + name + " HAPPY BIRTHDAY IN ADVANCE!!!"; 
             mailItem.To = email;
-            mailItem.Body = "Happy Birthday in advance!";
+            mailItem.HTMLBody = "<HTML>Hey " +
+                "<br><h2>Do you want to wish " + name + " in advance as you may not wish on weekend???</h2>" + 
+                "<br><br><h2>" +
+                emp.EmpName +
+                "'s BIRTHDAY!</h2><br><br>" + "<h4>Name: " +
+                emp.EmpName +
+                "<br>Birthday: " +
+                emp.DateOfBirthday.ToString("dd-MMMM") +
+                "</h4><br><br>";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
             mailItem.Display(false);
         }
@@ -89,9 +125,16 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "Happy Birthday " + name; ;
+            mailItem.Subject = "WISH " + name + " BELATED HAPPY BIRTHDAY!!!"  ;
             mailItem.To = email;
-            mailItem.Body = "Happy Belated Birthday!";
+            mailItem.HTMLBody = "<HTML>Hey " +
+                "<br><br><h2>" +
+                emp.EmpName +
+                "'s BELATED HAPPY BIRTHDAY!</h2><br><br>" + "<h4>Name: " +
+                emp.EmpName +
+                "<br>Birthday: " +
+                emp.DateOfBirthday.ToString("dd-MMMM") +
+                "</h4><br><br>";
             mailItem.Importance = Outlook.OlImportance.olImportanceLow;
             mailItem.Display(false);
         }
@@ -191,7 +234,7 @@ namespace SendEmail
                     "</td><td>" +
                     item.EmpName +
                     "</td><td>" +
-                    item.DateOfBirthday +
+                    item.DateOfBirthday.ToString("dd-MMMM") +
                     "</td></tr>";
             }
 
@@ -200,7 +243,7 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "MONTHLY BIRTHDAY REMINDER!!";
+            mailItem.Subject = "MONTHLY BIRTHDAY REMINDER!!!";
             mailItem.To = Application.Session.CurrentUser.
             AddressEntry.GetExchangeUser().PrimarySmtpAddress;
             mailItem.HTMLBody = str;
@@ -221,7 +264,7 @@ namespace SendEmail
                     "</td><td>" +
                     item.EmpName +
                     "</td><td>" +
-                    item.DateOfJoining +
+                    item.DateOfJoining.ToString("dd-MMMM-yyyy") +
                     "</td></tr>";
             }
 
@@ -230,7 +273,7 @@ namespace SendEmail
             Outlook.MailItem mailItem = (Outlook.MailItem)
                 this.Application.CreateItem(Outlook.OlItemType.olMailItem);
 
-            mailItem.Subject = "MONTHLY SERVICE DELIVERY REMINDER!!";
+            mailItem.Subject = "MONTHLY SERVICE DELIVERY REMINDER!!!";
             mailItem.To = Application.Session.CurrentUser.
             AddressEntry.GetExchangeUser().PrimarySmtpAddress;
             mailItem.HTMLBody = str;
@@ -289,7 +332,7 @@ namespace SendEmail
                 "'s SERVICE ANNIVERSARY!</h2><br><br>" + "<h4>Name: " +
                 emp.EmpName +
                 "<br>Joining Date: " +
-                emp.DateOfJoining.Date +
+                emp.DateOfJoining.Date.ToString("dd-MMMM-yyyy") +
                 "</h4><br><br>" + "It's been " +
                 (DateTime.Now.Year - emp.DateOfJoining.Year).ToString() +
                 " successful years!";
@@ -367,12 +410,8 @@ namespace SendEmail
                 "'s BIRTHDAY!</h2><br><br>" + "<h4>Name: " +
                 emp.EmpName +
                 "<br>Birth Date: " +
-                emp.DateOfBirthday +
-                "</h4><br><br>" +
-                emp.EmpName +
-                " has become " + 
-                (DateTime.Now.Year - emp.DateOfBirthday.Year).ToString() +
-                " years old!";
+                emp.DateOfBirthday.ToString("dd-MMMM") +
+                "</h4><br><br>";
 
             mailItem.Importance = Outlook.OlImportance.olImportanceHigh;
             //mailItem.Display(false);
